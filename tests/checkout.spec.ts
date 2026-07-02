@@ -14,7 +14,7 @@ test.describe('Cart & Checkout', () => {
 
   test('cart is empty by default', async ({ inventoryPage, page }) => {
     await inventoryPage.goToCart();
-    await expect(page.locator('[data-test="cart-item"]')).toHaveCount(0);
+    await expect(page.locator('.cart_item')).toHaveCount(0);
   });
 
   test('item added in inventory appears in cart', async ({ inventoryPage, cartPage }) => {
@@ -27,7 +27,7 @@ test.describe('Cart & Checkout', () => {
     await inventoryPage.addToCart('Sauce Labs Backpack');
     await inventoryPage.goToCart();
     await cartPage.removeItem('Sauce Labs Backpack');
-    await expect(page.locator('[data-test="cart-item"]')).toHaveCount(0);
+    await expect(page.locator('.cart_item')).toHaveCount(0);
   });
 
   test('continue shopping returns to inventory', async ({ inventoryPage, cartPage, page }) => {
@@ -66,7 +66,7 @@ test.describe('Cart & Checkout', () => {
     await inventoryPage.addToCart('Sauce Labs Backpack');
     await inventoryPage.addToCart('Sauce Labs Bike Light');
     await inventoryPage.goToCart();
-    await expect(page.locator('[data-test="cart-item"]')).toHaveCount(2);
+    await expect(page.locator('.cart_item')).toHaveCount(2);
     await cartPage.checkout();
     await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
     await checkoutPage.finish();

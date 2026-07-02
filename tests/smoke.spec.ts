@@ -7,7 +7,7 @@ const PASSWORD  = process.env.SAUCE_PASSWORD!;
 test('E2E smoke: complete purchase flow', async ({ page }) => {
 
   // 1. login
-  await page.goto(BASE_URL);
+  await page.goto('/');
   await page.locator('[data-test="username"]').fill(USERNAME);
   await page.locator('[data-test="password"]').fill(PASSWORD);
 
