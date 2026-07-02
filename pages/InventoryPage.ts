@@ -1,23 +1,23 @@
-import { Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 
 export class InventoryPage {
-  constructor(private page: Page) {}
+  readonly page:          Page;
+  readonly cartLink:      Locator;
+  readonly sortDropdown:  Locator;
+  readonly cartBadge:     Locator;
 
-  // Locators
-  private cartBadge     = () => this.page.locator('[data-test="shopping-cart-badge"]');
-  private cartLink      = () => this.page.locator('[data-test="shopping-cart-link"]');
+  constructor(page: Page) {
+    this.page         = page;
+    this.cartLink     = page.locator('[data-test="shopping-cart-link"]');
+    this.sortDropdown = page.locator('[data-test="product-sort-container"]');
+    this.cartBadge    = page.locator('[data-test="shopping-cart-badge"]');
+  }
 
-  // Actions
   async selectProduct(productName: string) {
     await this.page.getByText(productName).click();
   }
 
-  async addToCart() {
-    await this.page.getByRole('button', { name: 'Add to cart' }).click();
-  }
-
-  // Add to cart directly from inventory listing
-  async addToCartByName(productName: string) {
+  async addToCart(productName: string) {
     await this.page
       .locator('.inventory_item')
       .filter({ hasText: productName })
@@ -25,12 +25,34 @@ export class InventoryPage {
       .click();
   }
 
-  async goToCart() {
-    await this.cartLink().click();
+  async removeFromCart(productName: string) {
+    await this.page
+      .locator('.inventory_item')
+      .filter({ hasText: productName })
+      .getByRole('button', { name: 'Remove' })
+      .click();
   }
 
-  // Getter untuk assertion di spec
-  getCartBadge() {
-    return this.cartBadge();
+  async sortBy(option: 'az' | 'za' | 'lohi' | 'hilo') {
+    await this.sortDropdown.selectOption(option);
+  }
+
+  async goToCart() {
+    await this.cartLink.click();
+  }
+
+  async getCartCount(): Promise<number> {
+    const visible = await this.cartBadge.isVisible();
+    if (!visible) return 0;
+    return parseInt(await this.cartBadge.innerText(), 10);
+  }
+
+  async getProductNames(): Promise<string[]> {
+    return this.page.locator('[data-test="inventory-item-name"]').allInnerTexts();
+  }
+
+  async getProductPrices(): Promise<number[]> {
+    const texts = await this.page.locator('[data-test="inventory-item-price"]').allInnerTexts();
+    return texts.map(t => parseFloat(t.replace('$', '')));
   }
 }

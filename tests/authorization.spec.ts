@@ -1,11 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from '../fixtures';
+import { USERS }         from '../utils/testData';
 
-test("Login with valid credentials", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
-
-  await page.getByRole('textbox', { name: 'Username' }).fill('standard_user');
-  await page.locator('[data-test="password"]').fill('secret_sauce');
-  await page.locator('[data-test="login-button"]').click();
-
+// Basic authorization check using POM (kept as a quick sanity test)
+test('Login with valid credentials → inventory page', async ({ loginPage, page }) => {
+  await loginPage.goto();
+  await loginPage.loginAs(USERS.standard.username, USERS.standard.password);
   await expect(page).toHaveURL(/inventory\.html/);
 });

@@ -1,21 +1,33 @@
-import { Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 
 export class LoginPage {
-  constructor(private page: Page) {}
+  readonly page:          Page;
+  readonly usernameInput: Locator;
+  readonly passwordInput: Locator;
+  readonly loginButton:   Locator;
+  readonly errorMessage:  Locator;
 
-  // Locators
-  private usernameInput = () => this.page.getByRole('textbox', { name: 'Username' });
-  private passwordInput = () => this.page.locator('[data-test="password"]');
-  private loginButton   = () => this.page.getByRole('button', { name: 'Login' });
-
-  // Actions
-  async goto() {
-    await this.page.goto('https://www.saucedemo.com');
+  constructor(page: Page) {
+    this.page          = page;
+    this.usernameInput = page.locator('[data-test="username"]');
+    this.passwordInput = page.locator('[data-test="password"]');
+    this.loginButton   = page.locator('[data-test="login-button"]');
+    this.errorMessage  = page.locator('[data-test="error"]');
   }
 
-  async login(username: string, password: string) {
-    await this.usernameInput().fill(username);
-    await this.passwordInput().fill(password);
-    await this.loginButton().click();
+  async goto() {
+    await this.page.goto(process.env.SAUCE_BASE_URL!);
+  }
+
+  // Login with explicit credentials (used by fixtures & negative tests)
+  async loginAs(username: string, password: string) {
+    await this.usernameInput.fill(username);
+    await this.passwordInput.fill(password);
+    await this.loginButton.click();
+  }
+
+  // Convenience wrapper that reads from .env (keeps existing smoke tests working)
+  async login() {
+    await this.loginAs(process.env.SAUCE_USERNAME!, process.env.SAUCE_PASSWORD!);
   }
 }

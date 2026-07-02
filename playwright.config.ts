@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
@@ -8,7 +10,10 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    trace: 'on-first-retry',
+    baseURL: process.env.SAUCE_BASE_URL,
+    trace:      'on-first-retry',       // attach trace zip on retry
+    screenshot: 'only-on-failure',      // capture screenshot when a test fails
+    video:      'retain-on-failure',    // keep video recording only on failure
   },
   projects: [
     {

@@ -1,47 +1,36 @@
-import { Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 
 export class CheckoutPage {
-  constructor(private page: Page) {}
+  readonly page:            Page;
+  readonly firstNameInput:  Locator;
+  readonly lastNameInput:   Locator;
+  readonly zipInput:        Locator;
+  readonly continueButton:  Locator;
+  readonly finishButton:    Locator;
+  readonly confirmHeading:  Locator;
+  readonly completeText:    Locator;
+  readonly errorMessage:    Locator;  // shown when required fields are missing
 
-  // Locators - Step 1
-  private firstNameInput = () => this.page.getByPlaceholder('First Name');
-  private lastNameInput  = () => this.page.getByPlaceholder('Last Name');
-  private zipInput       = () => this.page.getByPlaceholder('Zip/Postal Code');
-  private continueButton = () => this.page.getByRole('button', { name: 'Continue' });
-
-  // Locators - Step 2
-  private itemName       = () => this.page.locator('[data-test="inventory-item-name"]');
-  private paymentInfo    = () => this.page.locator('[data-test="payment-info-value"]');
-  private totalLabel     = () => this.page.locator('[data-test="total-label"]');
-  private finishButton   = () => this.page.getByRole('button', { name: 'Finish' });
-
-  // Locators - Complete
-  private confirmHeading = () => this.page.getByRole('heading', { name: 'Thank you for your order!' });
-  private completeText   = () => this.page.locator('[data-test="complete-text"]');
-  private backHomeButton = () => this.page.getByRole('button', { name: 'Back Home' });
-
-  // Actions - Step 1
-  async fillCustomerInfo(firstName: string, lastName: string, zip: string) {
-    await this.firstNameInput().fill(firstName);
-    await this.lastNameInput().fill(lastName);
-    await this.zipInput().fill(zip);
-    await this.continueButton().click();
+  constructor(page: Page) {
+    this.page           = page;
+    this.firstNameInput = page.locator('[data-test="firstName"]');
+    this.lastNameInput  = page.locator('[data-test="lastName"]');
+    this.zipInput       = page.locator('[data-test="postalCode"]');
+    this.continueButton = page.locator('[data-test="continue"]');
+    this.finishButton   = page.locator('[data-test="finish"]');
+    this.confirmHeading = page.locator('[data-test="complete-header"]');
+    this.completeText   = page.locator('[data-test="complete-text"]');
+    this.errorMessage   = page.locator('[data-test="error"]');
   }
 
-  // Actions - Step 2
+  async fillInfo(firstName: string, lastName: string, zip: string) {
+    await this.firstNameInput.fill(firstName);
+    await this.lastNameInput.fill(lastName);
+    await this.zipInput.fill(zip);
+    await this.continueButton.click();
+  }
+
   async finish() {
-    await this.finishButton().click();
+    await this.finishButton.click();
   }
-
-  // Actions - Complete
-  async backToHome() {
-    await this.backHomeButton().click();
-  }
-
-  // Getters untuk assertion di spec
-  getItemName()       { return this.itemName(); }
-  getPaymentInfo()    { return this.paymentInfo(); }
-  getTotalLabel()     { return this.totalLabel(); }
-  getConfirmHeading() { return this.confirmHeading(); }
-  getCompleteText()   { return this.completeText(); }
 }

@@ -1,43 +1,30 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { InventoryPage } from '../pages/InventoryPage';
-import { CartPage } from '../pages/CartPage';
-import { CheckoutPage } from '../pages/CheckoutPage';
+import { test, expect } from '../fixtures';
+import { USERS, CUSTOMER } from '../utils/testData';
 
-test('E2E smoke (PoM): complete purchase flow', async ({ page }) => {
-  const loginPage    = new LoginPage(page);
-  const inventoryPage = new InventoryPage(page);
-  const cartPage     = new CartPage(page);
-  const checkoutPage = new CheckoutPage(page);
+test.describe('E2E smoke', () => {
 
-  // 1. login
-  await loginPage.goto();
-  await loginPage.login('standard_user', 'secret_sauce');
-  await expect(page).toHaveURL(/inventory\.html/);
+  test.beforeEach(async ({ loginPage }) => {
+    await loginPage.goto();
+    await loginPage.loginAs(USERS.standard.username, USERS.standard.password);
+  });
 
-  // 2. add product to cart
-  await inventoryPage.addToCartByName('Sauce Labs Backpack');
-  await expect(inventoryPage.getCartBadge()).toHaveText('1');
+  test.afterEach(async ({ page }) => {
+    await page.evaluate(() => localStorage.clear());
+  });
 
-  // 3. go to cart
-  await inventoryPage.goToCart();
-  await expect(page).toHaveURL(/cart\.html/);
-  await expect(cartPage.getItemName()).toContainText('Sauce Labs Backpack');
+  test('complete purchase flow', async ({ inventoryPage, cartPage, checkoutPage, page }) => {
+    await inventoryPage.addToCart('Sauce Labs Backpack');
+    await inventoryPage.goToCart();
+    await expect(page).toHaveURL(/cart\.html/);
 
-  // 4. checkout — fill customer info
-  await cartPage.checkout();
-  await expect(page).toHaveURL(/checkout-step-one\.html/);
-  await checkoutPage.fillCustomerInfo('Wonderkid', 'Developer', '55281');
+    await cartPage.checkout();
+    await expect(page).toHaveURL(/checkout-step-one\.html/);
 
-  // 5. review order
-  await expect(page).toHaveURL(/checkout-step-two\.html/);
-  await expect(checkoutPage.getItemName()).toContainText('Sauce Labs Backpack');
-  await expect(checkoutPage.getPaymentInfo()).toBeVisible();
-  await expect(checkoutPage.getTotalLabel()).toBeVisible();
-  await checkoutPage.finish();
+    await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
+    await checkoutPage.finish();
 
-  // 6. order confirmation
-  await expect(page).toHaveURL(/checkout-complete\.html/);
-  await expect(checkoutPage.getConfirmHeading()).toBeVisible();
-  await expect(checkoutPage.getCompleteText()).toContainText('Your order has been dispatched');
+    await expect(page).toHaveURL(/checkout-complete\.html/);
+    await expect(checkoutPage.confirmHeading).toHaveText('Thank you for your order!');
+  });
+
 });
