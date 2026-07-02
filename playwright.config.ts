@@ -11,9 +11,7 @@ export default defineConfig({
   reporter: 'html',
   use: {
     baseURL: process.env.SAUCE_BASE_URL,
-    trace:      'on-first-retry',       // attach trace zip on retry
-    screenshot: 'only-on-failure',      // capture screenshot when a test fails
-    video:      'retain-on-failure',    // keep video recording only on failure
+    trace: 'on-first-retry',
   },
   projects: [
     {
