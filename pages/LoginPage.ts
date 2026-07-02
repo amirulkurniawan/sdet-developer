@@ -16,7 +16,7 @@ export class LoginPage {
   }
 
   async goto() {
-    await this.page.goto(process.env.SAUCE_BASE_URL!);
+    await this.page.goto('/');
   }
 
   // Login with explicit credentials (used by fixtures & negative tests)

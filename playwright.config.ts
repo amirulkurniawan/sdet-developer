@@ -10,8 +10,10 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: process.env.SAUCE_BASE_URL,
-    trace: 'on-first-retry',
+    baseURL: process.env.SAUCE_BASE_URL ?? 'https://www.saucedemo.com',
+    trace:      'on-first-retry',
+    screenshot: 'only-on-failure',
+    video:      'retain-on-failure',
   },
   projects: [
     {
