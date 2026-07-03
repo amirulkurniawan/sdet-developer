@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL  = process.env.SAUCE_BASE_URL!;
-const USERNAME  = process.env.SAUCE_USERNAME  ?? 'standard_user';
-const PASSWORD  = process.env.SAUCE_PASSWORD  ?? 'secret_sauce';
+const USERNAME  = process.env.SAUCE_USERNAME!;
+const PASSWORD  = process.env.SAUCE_PASSWORD!;
 
 test('E2E smoke: complete purchase flow', async ({ page }) => {
 
@@ -24,9 +23,9 @@ test('E2E smoke: complete purchase flow', async ({ page }) => {
   // 4. checkout — fill customer info
   await page.locator('[data-test="checkout"]').click();
   await expect(page).toHaveURL(/checkout-step-one\.html/);
-  await page.locator('[data-test="firstName"]').fill(process.env.CUSTOMER_FIRST ?? 'John');
-  await page.locator('[data-test="lastName"]').fill(process.env.CUSTOMER_LAST ?? 'Doe');
-  await page.locator('[data-test="postalCode"]').fill(process.env.CUSTOMER_ZIP ?? '12345');
+  await page.locator('[data-test="firstName"]').fill(process.env.CUSTOMER_FIRST!);
+  await page.locator('[data-test="lastName"]').fill(process.env.CUSTOMER_LAST!);
+  await page.locator('[data-test="postalCode"]').fill(process.env.CUSTOMER_ZIP!);
   await page.locator('[data-test="continue"]').click();
 
   // 5. review order
