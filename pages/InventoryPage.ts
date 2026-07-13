@@ -33,6 +33,10 @@ export class InventoryPage {
       .click();
   }
 
+  async addProduct(productName: string): Promise<void> {
+    await this.addToCart(productName);
+  }
+
   async sortBy(option: 'az' | 'za' | 'lohi' | 'hilo') {
     await this.sortDropdown.selectOption(option);
   }

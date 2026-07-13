@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { CUSTOMER } from '../utils/testData';
 
-const USERNAME  = process.env.SAUCE_USERNAME!;
-const PASSWORD  = process.env.SAUCE_PASSWORD!;
+const USERNAME = process.env.SAUCE_USERNAME!;
+const PASSWORD = process.env.SAUCE_PASSWORD!;
 
 test('E2E smoke: complete purchase flow', async ({ page }) => {
 
@@ -9,7 +10,6 @@ test('E2E smoke: complete purchase flow', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-test="username"]').fill(USERNAME);
   await page.locator('[data-test="password"]').fill(PASSWORD);
-
   await page.locator('[data-test="login-button"]').click();
   await expect(page).toHaveURL(/inventory\.html/);
 
@@ -23,9 +23,9 @@ test('E2E smoke: complete purchase flow', async ({ page }) => {
   // 4. checkout — fill customer info
   await page.locator('[data-test="checkout"]').click();
   await expect(page).toHaveURL(/checkout-step-one\.html/);
-  await page.locator('[data-test="firstName"]').fill(process.env.CUSTOMER_FIRST!);
-  await page.locator('[data-test="lastName"]').fill(process.env.CUSTOMER_LAST!);
-  await page.locator('[data-test="postalCode"]').fill(process.env.CUSTOMER_ZIP!);
+  await page.locator('[data-test="firstName"]').fill(CUSTOMER.firstName);
+  await page.locator('[data-test="lastName"]').fill(CUSTOMER.lastName);
+  await page.locator('[data-test="postalCode"]').fill(CUSTOMER.zip);
   await page.locator('[data-test="continue"]').click();
 
   // 5. review order
@@ -34,6 +34,6 @@ test('E2E smoke: complete purchase flow', async ({ page }) => {
 
   // 6. order confirmation
   await expect(page).toHaveURL(/checkout-complete\.html/);
-  await expect(page.locator('.complete-header')).toHaveText('Thank you for your order!');
+  await expect(page.locator('[data-test="complete-header"]')).toHaveText('Thank you for your order!');
 
 });

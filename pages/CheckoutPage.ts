@@ -28,9 +28,25 @@ export class CheckoutPage {
     await this.lastNameInput.fill(lastName);
     await this.zipInput.fill(zip);
     await this.continueButton.click();
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async finish() {
     await this.finishButton.click();
+  }
+
+  async getItemTotal(): Promise<number> {
+    const text = await this.page.locator('[data-test="subtotal-label"]').innerText();
+    const match = text.match(/\$([\d.]+)/);
+    if (!match) {
+      throw new Error(`Cannot parse subtotal-label text: "${text}"`);
+    }
+    return parseFloat(match[1]);
+  }
+
+  async checkTotal(cartItemPrices: number[]): Promise<boolean> {
+    const sum = cartItemPrices.reduce((acc, p) => acc + p, 0);
+    const itemTotal = await this.getItemTotal();
+    return Math.abs(sum - itemTotal) <= 0.01;
   }
 }

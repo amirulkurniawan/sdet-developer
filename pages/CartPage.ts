@@ -28,4 +28,11 @@ export class CartPage {
     const id = productName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     await this.page.locator(`[data-test="remove-${id}"]`).click();
   }
+
+  async getItemPrices(): Promise<number[]> {
+    const cartItems = this.page.locator('[data-test="inventory-item"]');
+    const priceLocators = cartItems.locator('[data-test="inventory-item-price"]');
+    const texts = await priceLocators.allInnerTexts();
+    return texts.map(t => parseFloat(t.replace('$', '')));
+  }
 }

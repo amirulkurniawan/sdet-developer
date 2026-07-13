@@ -14,7 +14,7 @@ test.describe('Cart & Checkout', () => {
 
   test('cart is empty by default', async ({ inventoryPage, page }) => {
     await inventoryPage.goToCart();
-    await expect(page.locator('.cart_item')).toHaveCount(0);
+    await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(0);
   });
 
   test('item added in inventory appears in cart', async ({ inventoryPage, cartPage }) => {
@@ -27,7 +27,7 @@ test.describe('Cart & Checkout', () => {
     await inventoryPage.addToCart('Sauce Labs Backpack');
     await inventoryPage.goToCart();
     await cartPage.removeItem('Sauce Labs Backpack');
-    await expect(page.locator('.cart_item')).toHaveCount(0);
+    await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(0);
   });
 
   test('continue shopping returns to inventory', async ({ inventoryPage, cartPage, page }) => {
@@ -66,11 +66,68 @@ test.describe('Cart & Checkout', () => {
     await inventoryPage.addToCart('Sauce Labs Backpack');
     await inventoryPage.addToCart('Sauce Labs Bike Light');
     await inventoryPage.goToCart();
-    await expect(page.locator('.cart_item')).toHaveCount(2);
+    await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(2);
     await cartPage.checkout();
     await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
     await checkoutPage.finish();
     await expect(checkoutPage.confirmHeading).toHaveText('Thank you for your order!');
+  });
+
+  test('price total matches sum for 2 items', async ({ inventoryPage, cartPage, checkoutPage, page }) => {
+    await inventoryPage.addProduct('Sauce Labs Backpack');
+    await inventoryPage.addProduct('Sauce Labs Bike Light');
+    await inventoryPage.goToCart();
+    await page.waitForURL(/cart\.html/);
+    await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(2);
+    const prices = await cartPage.getItemPrices();
+    await cartPage.checkout();
+    await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
+    const isConsistent = await checkoutPage.checkTotal(prices);
+    const sum = prices.reduce((a, p) => a + p, 0);
+    const itemTotal = await checkoutPage.getItemTotal();
+    expect(isConsistent, `Expected $${sum.toFixed(2)} but checkout shows $${itemTotal.toFixed(2)}`).toBe(true);
+  });
+
+  // Feature: checkout-price-validation, Property 2 & 3
+  test('round-trip price consistency — 1 item', async ({ inventoryPage, cartPage, checkoutPage }) => {
+    await inventoryPage.addProduct('Sauce Labs Backpack');
+    await inventoryPage.goToCart();
+    const prices = await cartPage.getItemPrices();
+    await cartPage.checkout();
+    await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
+    const isConsistent = await checkoutPage.checkTotal(prices);
+    const sum = prices.reduce((a, p) => a + p, 0);
+    const itemTotal = await checkoutPage.getItemTotal();
+    expect(isConsistent, `Expected $${sum.toFixed(2)} but checkout shows $${itemTotal.toFixed(2)}`).toBe(true);
+  });
+
+  // Feature: checkout-price-validation, Property 2 & 3
+  test('round-trip price consistency — 2 items', async ({ inventoryPage, cartPage, checkoutPage }) => {
+    await inventoryPage.addProduct('Sauce Labs Backpack');
+    await inventoryPage.addProduct('Sauce Labs Bike Light');
+    await inventoryPage.goToCart();
+    const prices = await cartPage.getItemPrices();
+    await cartPage.checkout();
+    await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
+    const isConsistent = await checkoutPage.checkTotal(prices);
+    const sum = prices.reduce((a, p) => a + p, 0);
+    const itemTotal = await checkoutPage.getItemTotal();
+    expect(isConsistent, `Expected $${sum.toFixed(2)} but checkout shows $${itemTotal.toFixed(2)}`).toBe(true);
+  });
+
+  // Feature: checkout-price-validation, Property 2 & 3
+  test('round-trip price consistency — 3 items', async ({ inventoryPage, cartPage, checkoutPage }) => {
+    await inventoryPage.addProduct('Sauce Labs Backpack');
+    await inventoryPage.addProduct('Sauce Labs Bike Light');
+    await inventoryPage.addProduct('Sauce Labs Bolt T-Shirt');
+    await inventoryPage.goToCart();
+    const prices = await cartPage.getItemPrices();
+    await cartPage.checkout();
+    await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
+    const isConsistent = await checkoutPage.checkTotal(prices);
+    const sum = prices.reduce((a, p) => a + p, 0);
+    const itemTotal = await checkoutPage.getItemTotal();
+    expect(isConsistent, `Expected $${sum.toFixed(2)} but checkout shows $${itemTotal.toFixed(2)}`).toBe(true);
   });
 
 });
