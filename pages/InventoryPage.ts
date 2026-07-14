@@ -14,7 +14,8 @@ export class InventoryPage {
   }
 
   async selectProduct(productName: string) {
-    await this.page.getByText(productName).click();
+    // Scoped to item name locator to avoid matching description text
+    await this.page.locator('[data-test="inventory-item-name"]', { hasText: productName }).click();
   }
 
   async addToCart(productName: string) {

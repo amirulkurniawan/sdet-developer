@@ -77,57 +77,77 @@ test.describe('Cart & Checkout', () => {
     await inventoryPage.addProduct('Sauce Labs Backpack');
     await inventoryPage.addProduct('Sauce Labs Bike Light');
     await inventoryPage.goToCart();
+    // Wait for cart page and items to be fully rendered before reading prices
     await page.waitForURL(/cart\.html/);
     await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(2);
-    const prices = await cartPage.getItemPrices();
+    const cartPrices = await cartPage.getItemPrices();
     await cartPage.checkout();
+    // fillInfo now waits for checkout-step-two.html URL before returning
     await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
-    const isConsistent = await checkoutPage.checkTotal(prices);
-    const sum = prices.reduce((a, p) => a + p, 0);
+    // Read itemTotal once and use it for both comparison and failure message
     const itemTotal = await checkoutPage.getItemTotal();
-    expect(isConsistent, `Expected $${sum.toFixed(2)} but checkout shows $${itemTotal.toFixed(2)}`).toBe(true);
+    const cartSum = cartPrices.reduce((a, p) => a + p, 0);
+    expect(
+      Math.abs(cartSum - itemTotal) <= 0.01,
+      `Cart sum $${cartSum.toFixed(2)} does not match checkout Item Total $${itemTotal.toFixed(2)}`
+    ).toBe(true);
   });
 
   // Feature: checkout-price-validation, Property 2 & 3
-  test('round-trip price consistency — 1 item', async ({ inventoryPage, cartPage, checkoutPage }) => {
+  test('round-trip price consistency — 1 item', async ({ inventoryPage, cartPage, checkoutPage, page }) => {
     await inventoryPage.addProduct('Sauce Labs Backpack');
+    // Wait for cart page and item to be fully rendered before reading prices
     await inventoryPage.goToCart();
-    const prices = await cartPage.getItemPrices();
+    await page.waitForURL(/cart\.html/);
+    await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(1);
+    const cartPrices = await cartPage.getItemPrices();
     await cartPage.checkout();
     await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
-    const isConsistent = await checkoutPage.checkTotal(prices);
-    const sum = prices.reduce((a, p) => a + p, 0);
     const itemTotal = await checkoutPage.getItemTotal();
-    expect(isConsistent, `Expected $${sum.toFixed(2)} but checkout shows $${itemTotal.toFixed(2)}`).toBe(true);
+    const cartSum = cartPrices.reduce((a, p) => a + p, 0);
+    expect(
+      Math.abs(cartSum - itemTotal) <= 0.01,
+      `Cart sum $${cartSum.toFixed(2)} does not match checkout Item Total $${itemTotal.toFixed(2)}`
+    ).toBe(true);
   });
 
   // Feature: checkout-price-validation, Property 2 & 3
-  test('round-trip price consistency — 2 items', async ({ inventoryPage, cartPage, checkoutPage }) => {
+  test('round-trip price consistency — 2 items', async ({ inventoryPage, cartPage, checkoutPage, page }) => {
     await inventoryPage.addProduct('Sauce Labs Backpack');
     await inventoryPage.addProduct('Sauce Labs Bike Light');
+    // Wait for cart page and items to be fully rendered before reading prices
     await inventoryPage.goToCart();
-    const prices = await cartPage.getItemPrices();
+    await page.waitForURL(/cart\.html/);
+    await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(2);
+    const cartPrices = await cartPage.getItemPrices();
     await cartPage.checkout();
     await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
-    const isConsistent = await checkoutPage.checkTotal(prices);
-    const sum = prices.reduce((a, p) => a + p, 0);
     const itemTotal = await checkoutPage.getItemTotal();
-    expect(isConsistent, `Expected $${sum.toFixed(2)} but checkout shows $${itemTotal.toFixed(2)}`).toBe(true);
+    const cartSum = cartPrices.reduce((a, p) => a + p, 0);
+    expect(
+      Math.abs(cartSum - itemTotal) <= 0.01,
+      `Cart sum $${cartSum.toFixed(2)} does not match checkout Item Total $${itemTotal.toFixed(2)}`
+    ).toBe(true);
   });
 
   // Feature: checkout-price-validation, Property 2 & 3
-  test('round-trip price consistency — 3 items', async ({ inventoryPage, cartPage, checkoutPage }) => {
+  test('round-trip price consistency — 3 items', async ({ inventoryPage, cartPage, checkoutPage, page }) => {
     await inventoryPage.addProduct('Sauce Labs Backpack');
     await inventoryPage.addProduct('Sauce Labs Bike Light');
     await inventoryPage.addProduct('Sauce Labs Bolt T-Shirt');
+    // Wait for cart page and items to be fully rendered before reading prices
     await inventoryPage.goToCart();
-    const prices = await cartPage.getItemPrices();
+    await page.waitForURL(/cart\.html/);
+    await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(3);
+    const cartPrices = await cartPage.getItemPrices();
     await cartPage.checkout();
     await checkoutPage.fillInfo(CUSTOMER.firstName, CUSTOMER.lastName, CUSTOMER.zip);
-    const isConsistent = await checkoutPage.checkTotal(prices);
-    const sum = prices.reduce((a, p) => a + p, 0);
     const itemTotal = await checkoutPage.getItemTotal();
-    expect(isConsistent, `Expected $${sum.toFixed(2)} but checkout shows $${itemTotal.toFixed(2)}`).toBe(true);
+    const cartSum = cartPrices.reduce((a, p) => a + p, 0);
+    expect(
+      Math.abs(cartSum - itemTotal) <= 0.01,
+      `Cart sum $${cartSum.toFixed(2)} does not match checkout Item Total $${itemTotal.toFixed(2)}`
+    ).toBe(true);
   });
 
 });

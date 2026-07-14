@@ -24,6 +24,11 @@ export class LoginPage {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
+    // Wait for navigation: either inventory (success) or the error message visible (failure)
+    await Promise.race([
+      this.page.waitForURL(/inventory\.html/),
+      this.errorMessage.waitFor({ state: 'visible' }),
+    ]);
   }
 
   // Convenience wrapper that reads from .env (keeps existing smoke tests working)

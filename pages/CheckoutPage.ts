@@ -28,7 +28,13 @@ export class CheckoutPage {
     await this.lastNameInput.fill(lastName);
     await this.zipInput.fill(zip);
     await this.continueButton.click();
-    await this.page.waitForLoadState('domcontentloaded');
+    // Wait for either: successful navigation to step-two, OR validation error appearing.
+    // Negative tests (missing fields) stay on step-one and show an error — they must not
+    // wait for a URL that will never arrive.
+    await Promise.race([
+      this.page.waitForURL(/checkout-step-two\.html/),
+      this.errorMessage.waitFor({ state: 'visible' }),
+    ]);
   }
 
   async finish() {
